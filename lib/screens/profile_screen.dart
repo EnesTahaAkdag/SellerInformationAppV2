@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import '../widgets/app_layout.dart';
 
-class ChartScreen extends StatelessWidget {
-  const ChartScreen({super.key});
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return AppLayout(
-      title: 'Grafikler',
-      currentIndex: 2,
+      title: 'Profil',
+      currentIndex: 3,
       body: const Center(
         child: Text(
-          'Grafikler Yakında',
+          'Profil Yakında',
           style: TextStyle(fontSize: 24),
         ),
       ),

@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
+import '../widgets/app_layout.dart';
 
-class SellerListScreen extends StatefulWidget {
+class SellerListScreen extends StatelessWidget {
   const SellerListScreen({super.key});
 
   @override
-  State<SellerListScreen> createState() => _nameState();
-}
-
-class _nameState extends State<SellerListScreen> {
-  @override
   Widget build(BuildContext context) {
-    return Container();
+    return AppLayout(
+      title: 'Mağaza Listesi',
+      currentIndex: 1,
+      body: const Center(
+        child: Text(
+          'Mağaza Listesi Yakında',
+          style: TextStyle(fontSize: 24),
+        ),
+      ),
+    );
   }
 }
