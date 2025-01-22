@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../widgets/app_layout.dart';
 import '../services/seller_api_service.dart';
 import '../models/seller_infos_list_model.dart';
@@ -22,60 +23,39 @@ class _SellerListScreenState extends State<SellerListScreen> {
     _sellersFuture = _apiService.getSellerList();
   }
 
-  Future<void> _showDetailDialog(BuildContext context, int id) async {
-    try {
-      final detail = await _apiService.getSellerDetail(id);
-      if (!mounted) return;
+  Future<void> _launchURL(BuildContext context, String? url) async {
+    if (url == null || url.isEmpty) return;
 
-      showDialog(
-        // ignore: use_build_context_synchronously
-        context: context,
-        builder: (context) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          title: Text(
-            detail.storeName,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildDetailRow(Icons.person, 'Satıcı',
-                    detail.sellerName ?? 'Belirtilmemiş'),
-                _buildDetailRow(Icons.phone, 'Telefon',
-                    detail.telephone ?? 'Belirtilmemiş'),
-                _buildDetailRow(
-                    Icons.email, 'E-posta', detail.email ?? 'Belirtilmemiş'),
-                _buildDetailRow(Icons.location_on, 'Adres',
-                    detail.address ?? 'Belirtilmemiş'),
-                _buildDetailRow(
-                    Icons.link, 'Website', detail.link ?? 'Belirtilmemiş'),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Kapat'),
-            ),
-          ],
-        ),
-      );
+    try {
+      final Uri uri = Uri.parse(url);
+      if (!uri.hasScheme) {
+        final httpsUrl = 'https://$url';
+        final httpsUri = Uri.parse(httpsUrl);
+        if (await canLaunchUrl(httpsUri)) {
+          await launchUrl(httpsUri, mode: LaunchMode.externalApplication);
+          return;
+        }
+      }
+
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Link açılamadı')),
+        );
+      }
     } catch (e) {
-      // ignore: use_build_context_synchronously
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Hata: $e')),
+        SnackBar(content: Text('Geçersiz URL formatı: $e')),
       );
     }
   }
 
-  Widget _buildDetailRow(IconData icon, String label, String value) {
+  Widget _buildDetailRow(
+      BuildContext context, IconData icon, String label, String value,
+      {bool isLink = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -94,16 +74,101 @@ class _SellerListScreenState extends State<SellerListScreen> {
                     color: Colors.grey,
                   ),
                 ),
-                Text(
-                  value,
-                  style: const TextStyle(fontSize: 16),
-                ),
+                isLink && value != 'Belirtilmemiş'
+                    ? InkWell(
+                        onTap: () => _launchURL(context, value),
+                        child: Text(
+                          value,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.blue,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      )
+                    : Text(
+                        value,
+                        style: const TextStyle(fontSize: 16),
+                      ),
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _showDetailDialog(BuildContext context, int id) async {
+    try {
+      final detail = await _apiService.getSellerDetail(id);
+      if (!context.mounted) return;
+
+      await showDialog(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Text(
+            detail.storeName,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildDetailRow(
+                  dialogContext,
+                  Icons.person,
+                  'Satıcı',
+                  detail.sellerName ?? 'Belirtilmemiş',
+                ),
+                _buildDetailRow(
+                  dialogContext,
+                  Icons.phone,
+                  'Telefon',
+                  detail.telephone ?? 'Belirtilmemiş',
+                ),
+                _buildDetailRow(
+                  dialogContext,
+                  Icons.email,
+                  'E-posta',
+                  detail.email ?? 'Belirtilmemiş',
+                ),
+                _buildDetailRow(
+                  dialogContext,
+                  Icons.location_on,
+                  'Adres',
+                  detail.address ?? 'Belirtilmemiş',
+                ),
+                _buildDetailRow(
+                  dialogContext,
+                  Icons.link,
+                  'Website',
+                  detail.link ?? 'Belirtilmemiş',
+                  isLink: true,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Kapat'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Hata: $e')),
+      );
+    }
   }
 
   @override

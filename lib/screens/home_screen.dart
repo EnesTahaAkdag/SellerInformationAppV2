@@ -13,15 +13,8 @@ class HomeScreen extends StatelessWidget {
       title: 'Ana Sayfa',
       currentIndex: 0,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              const Color(0xFF333333),
-              Colors.white,
-            ],
-          ),
+        decoration: const BoxDecoration(
+          color: Color(0xFFF5F5F5),
         ),
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -33,7 +26,7 @@ class HomeScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 194, 197, 199),
+                  color: Color(0xFF333333),
                 ),
               ),
               const SizedBox(height: 20),
