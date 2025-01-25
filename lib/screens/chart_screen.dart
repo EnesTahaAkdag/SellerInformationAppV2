@@ -29,11 +29,13 @@ class _ChartScreenState extends State<ChartScreen> {
   Future<void> _loadData() async {
     try {
       final data = await _apiService.fetchChartData();
+      if (!mounted) return; // Widget hala ağaçta mı kontrol et
       setState(() {
         chartData = data;
         isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return; // Widget hala ağaçta mı kontrol et
       setState(() {
         isLoading = false;
       });
@@ -41,6 +43,12 @@ class _ChartScreenState extends State<ChartScreen> {
         SnackBar(content: Text('Veri yüklenirken hata oluştu: $e')),
       );
     }
+  }
+
+  // Toplam değerlendirme sayısını hesaplayan yardımcı metod
+  int _calculateTotal() {
+    return chartData!.data.fold(0, (sum, item) => sum + item.count) +
+        chartData!.nullValueCount;
   }
 
   @override
@@ -86,7 +94,7 @@ class _ChartScreenState extends State<ChartScreen> {
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        'Toplam Değerlendirme: ${chartData!.totalCount}',
+                        'Toplam Değerlendirme: ${_calculateTotal()}',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -135,13 +143,15 @@ class _ChartScreenState extends State<ChartScreen> {
   }
 
   Widget _buildBarChart() {
+    final maxValue = [
+      ...chartData!.data.map((e) => e.count.toDouble()),
+      chartData!.nullValueCount.toDouble()
+    ].reduce((a, b) => a > b ? a : b);
+
     return BarChart(
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
-        maxY: [
-          ...chartData!.data.map((e) => e.count.toDouble()),
-          chartData!.nullValueCount.toDouble()
-        ].reduce((a, b) => a > b ? a : b),
+        maxY: maxValue,
         barGroups: [
           ...chartData!.data.map((data) {
             return BarChartGroupData(
@@ -358,7 +368,7 @@ class _ChartScreenState extends State<ChartScreen> {
   }
 
   Widget _buildPieChart() {
-    final total = chartData!.data.fold(0, (sum, item) => sum + item.count);
+    final total = _calculateTotal();
 
     return Stack(
       alignment: Alignment.center,

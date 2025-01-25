@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:seller_information_v2/services/base_url.dart';
+import 'package:seller_information_v2/base_url.dart';
 import '../models/chart_data_model.dart';
 import 'package:logging/logging.dart';
 

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:seller_information_v2/services/base_url.dart';
+import 'package:seller_information_v2/base_url.dart';
 import '../models/seller_infos_list_model.dart';
 import '../models/seller_infos_detail_model.dart';
 
@@ -11,10 +11,21 @@ class SellerApiService {
     'Accept': 'application/json',
   };
 
-  Future<List<SellerInfosListModel>> getSellerList() async {
+  int _currentPage = 1;
+  final int _pageSize = 50;
+
+  Future<List<SellerInfosListModel>> getSellerList(
+      {bool loadMore = false}) async {
+    if (loadMore) {
+      _currentPage++;
+    } else {
+      _currentPage = 1;
+    }
+
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/ApplicationContentApi/MarketPlaceData'),
+        Uri.parse(
+            '$baseUrl/ApplicationContentApi/MarketPlaceData?page=$_currentPage&pageSize=$_pageSize'),
         headers: _headers,
       );
 

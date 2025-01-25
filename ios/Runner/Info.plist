@@ -55,5 +55,9 @@
 		<string>http</string>
 		<string>https</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Profil fotoğrafı seçmek için galerinize erişim izni gerekiyor.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Profil fotoğrafı çekmek için kamera izni gerekiyor.</string>
 </dict>
 </plist>

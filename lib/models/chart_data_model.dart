@@ -3,7 +3,6 @@ class ChartResponse {
   final String? errorMessage;
   final List<ChartData> data;
   final int count;
-  final int totalCount;
   final int nullValueCount;
 
   ChartResponse({
@@ -11,7 +10,6 @@ class ChartResponse {
     this.errorMessage,
     required this.data,
     required this.count,
-    required this.totalCount,
     required this.nullValueCount,
   });
 
@@ -23,7 +21,6 @@ class ChartResponse {
           .map((item) => ChartData.fromJson(item))
           .toList(),
       count: json['count'],
-      totalCount: json['totalCount'],
       nullValueCount: json['nullValueCount'],
     );
   }
